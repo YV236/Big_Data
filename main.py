@@ -8,7 +8,11 @@ from src.data_loader import DataLoader
 from src.data_processor import DataProcessor
 from src.data_analyzer import DataAnalyzer
 from src.data_visualizer import DataVisualizer
-from config import get_config, EXTERNAL_API_URL, DATABASE_PATH, FIGURES_OUTPUT_DIR, LOGGING_LEVEL, LOGGING_FORMAT
+from config import (
+    get_config, EXTERNAL_API_URL, DATABASE_PATH, FIGURES_OUTPUT_DIR,
+    LOGGING_LEVEL, LOGGING_FORMAT,
+    DEFAULT_COUNTRIES_TO_ANALYZE, DEFAULT_START_YEAR, DEFAULT_END_YEAR, DEFAULT_FORECAST_YEARS
+)
 
 # Налаштування логування
 logging.basicConfig(
@@ -282,3 +286,6 @@ def main():
         logger.error(f"Помилка при виконанні програми: {e}")
         print(f"Сталася помилка: {e}")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()

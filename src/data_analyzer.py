@@ -155,30 +155,31 @@ class DataAnalyzer:
         Returns:
             pandas.DataFrame: Дані для порівняння
         """
-    self.logger.info(f"Порівняння країн: {', '.join(countries)}")
+        self.logger.info(f"Порівняння країн: {', '.join(countries)}")
 
-    try:
-        # Фільтрація даних за країнами
-        filtered_df = df[df['country'].isin(countries)]
+        try:
+            # Фільтрація даних за країнами
+            filtered_df = df[df['country'].isin(countries)]
 
-        if filtered_df.empty:
-            self.logger.warning("Немає даних для вказаних країн")
+            if filtered_df.empty:
+                self.logger.warning("Немає даних для вказаних країн")
+                return None
+
+            # Фільтрація за роками, якщо вказано
+            if start_year is not None:
+                filtered_df = filtered_df[filtered_df['year'] >= start_year]
+
+            if end_year is not None:
+                filtered_df = filtered_df[filtered_df['year'] <= end_year]
+
+            # Розрахунок загального приросту для країн
+            filtered_df = filtered_df.sort_values(['country', 'year'])
+            filtered_df['growth_value'] = filtered_df.groupby('country')['value'].diff()
+            filtered_df['growth_percentage'] = filtered_df.groupby('country')['value'].pct_change() * 100
+
+            return filtered_df
+
+        except Exception as e:
+            self.logger.error(f"Помилка при порівнянні країн: {e}")
             return None
 
-        # Фільтрація за роками, якщо вказано
-        if start_year is not None:
-            filtered_df = filtered_df[filtered_df['year'] >= start_year]
-
-        if end_year is not None:
-            filtered_df = filtered_df[filtered_df['year'] <= end_year]
-
-        # Розрахунок загального приросту для країн
-        filtered_df = filtered_df.sort_values(['country', 'year'])
-        filtered_df['growth_value'] = filtered_df.groupby('country')['value'].diff()
-        filtered_df['growth_percentage'] = filtered_df.groupby('country')['value'].pct_change() * 100
-
-        return filtered_df
-
-    except Exception as e:
-        self.logger.error(f"Помилка при порівнянні країн: {e}")
-        return None
