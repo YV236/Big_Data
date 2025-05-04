@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import logging
+import glob
 from datetime import datetime
 
 class DataLoader:
@@ -21,8 +22,7 @@ class DataLoader:
         self.output_dir = output_dir
         
         # Створення директорії, якщо вона не існує
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
         
         # Налаштування логування
         logging.basicConfig(
@@ -31,50 +31,44 @@ class DataLoader:
         )
         self.logger = logging.getLogger(__name__)
     
-    def fetch_data(self):
+    def fetch_data(self, filename="population_data.json"):
         """
-        Завантаження даних з API.
-        
-        Returns:
-            dict: Дані у форматі JSON
+        Завантаження даних з API або з файлу.
         """
-        self.logger.info(f"Завантаження даних з {self.api_url}")
-        
-        try:
+        # Sprawdź, czy існує JAKIKOLWIEK файл .json в каталозі raw
+        existing_jsons = glob.glob(os.path.join(self.output_dir, "*.json"))
+        if existing_jsons:
+            # Якщо є принаймні один файл, використовуйте перший з них
+            filepath = existing_jsons[0]
+            self.logger.info(f"Завантаження даних з файлу {filepath}")
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return data
+            except IOError as e:
+                self.logger.error(f"Помилка при завантаженні даних з файлу: {e}")
+                raise
+        else:
+            # Якщо немає жодного файлу, завантажте та збережіть
+            filepath = os.path.join(self.output_dir, filename)
+            self.logger.info(f"Завантаження даних з API {self.api_url}")
             response = requests.get(self.api_url)
-            response.raise_for_status()  # Перевірка на помилки HTTP
+            response.raise_for_status()
             data = response.json()
-            
-            self.logger.info("Дані успішно завантажені")
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+            self.logger.info(f"Дані збережено у файл {filepath}")
             return data
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Помилка при завантаженні даних: {e}")
-            raise
     
-    def save_data(self, data, filename=None):
+    def save_data(self, data, filename="population_data.json"):
         """
-        Збереження даних у файл JSON.
-        
-        Args:
-            data (dict): Дані для збереження
-            filename (str, optional): Ім'я файлу. Якщо не вказано, 
-                                      використовується поточна дата і час.
-        
-        Returns:
-            str: Шлях до збереженого файлу
+        Zapisuje dane do pliku JSON (nadpisuje plik, nie tworzy nowego!).
         """
-        if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"population_data_{timestamp}.json"
-        
         file_path = os.path.join(self.output_dir, filename)
-        
         self.logger.info(f"Збереження даних у файл {file_path}")
-        
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
-            
             self.logger.info("Дані успішно збережені")
             return file_path
         except IOError as e:

@@ -1,0 +1,16 @@
+1. З папки raw зберігався один json з даними +
+2. Зробити csv або Excel до графіків +
+3. Виписати, ЯКІ топ 5 країн +
+4. Виправити документацію в README +-
+5. Полегшити інтеграцію з інструментами BI
+6. Перекласти
+7. poprawić Raport 
+
+
+Kryteria oceny projektu
+Terminowość: — zależy od Ciebie.
+Przekrojowość: — dane mają wymiary, są przetwarzane, wyniki są obszerne.
+Prawidłowość: — kod działa, wyniki są generowane, nie zgłasza błędów.
+Niezawodność: — kod działa automatycznie, bez ręcznej ingerencji.
+Czystość: — kod jest czytelny, nie generuje ostrzeżeń (jeśli nie, popraw).
+Dokumentacja: — masz docstringi i komentarze, ale warto dodać plik README z założeniami projektu.

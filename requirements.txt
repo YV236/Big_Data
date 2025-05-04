@@ -19,3 +19,13 @@ scikit-learn==1.0
 
 # Для роботи з базами даних
 # sqlite3 є частиною стандартної бібліотеки Python
+
+# Biblioteki zewnętrzne wymagające instalacji (pip install ...):
+requests
+pandas
+matplotlib
+seaborn
+scikit-learn
+
+# Przykładowa komenda instalacji wszystkich naraz:
+pip install requests pandas matplotlib seaborn scikit-learn

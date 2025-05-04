@@ -35,7 +35,7 @@ class DataVisualizer:
         plt.rcParams['figure.figsize'] = (12, 6)
         plt.rcParams['font.size'] = 12
     
-    def plot_population_growth(self, df, country=None, save=True, show=True):
+    def plot_population_growth(self, df, country=None, start_year=None, end_year=None, save=True, show=True):
         """
         Побудова графіка зростання населення.
         
@@ -43,6 +43,8 @@ class DataVisualizer:
             df (pandas.DataFrame): Дані для візуалізації
             country (str, optional): Назва країни. Якщо не вказано, 
                                      будується графік для всіх країн.
+            start_year (int, optional): Початковий рік
+            end_year (int, optional): Кінцевий рік
             save (bool): Зберегти графік у файл
             show (bool): Показати графік
         
@@ -53,6 +55,12 @@ class DataVisualizer:
         
         try:
             plt.figure(figsize=(12, 6))
+            
+            # Фільтрація за роками
+            if start_year is not None:
+                df = df[df['year'] >= start_year]
+            if end_year is not None:
+                df = df[df['year'] <= end_year]
             
             if country:
                 # Фільтрація даних для вказаної країни
@@ -76,7 +84,8 @@ class DataVisualizer:
                     plt.plot(country_data['year'], country_data['value'], marker='o', linewidth=2, label=country)
                 
                 plt.legend()
-                plt.title('Зростання населення: Топ-5 країн')
+                top_countries_str = ', '.join(top_countries)
+                plt.title(f"Зростання населення: Топ-5 країн ({top_countries_str})")
             
             plt.xlabel('Рік')
             plt.ylabel('Населення')
@@ -104,7 +113,7 @@ class DataVisualizer:
             plt.close()
             raise
     
-    def plot_growth_percentage(self, df, country=None, save=True, show=True):
+    def plot_growth_percentage(self, df, country=None, start_year=None, end_year=None, save=True, show=True):
         """
         Побудова графіка відсотка зростання населення.
         
@@ -112,6 +121,8 @@ class DataVisualizer:
             df (pandas.DataFrame): Дані для візуалізації
             country (str, optional): Назва країни. Якщо не вказано, 
                                      будується графік для всіх країн.
+            start_year (int, optional): Початковий рік
+            end_year (int, optional): Кінцевий рік
             save (bool): Зберегти графік у файл
             show (bool): Показати графік
         
@@ -122,6 +133,12 @@ class DataVisualizer:
         
         try:
             plt.figure(figsize=(12, 6))
+            
+            # Фільтрація за роками
+            if start_year is not None:
+                df = df[df['year'] >= start_year]
+            if end_year is not None:
+                df = df[df['year'] <= end_year]
             
             if country:
                 # Фільтрація даних для вказаної країни

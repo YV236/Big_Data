@@ -4,6 +4,7 @@ import requests
 import logging
 import os
 import sys
+import glob
 from src.data_loader import DataLoader
 from src.data_processor import DataProcessor
 from src.data_analyzer import DataAnalyzer
@@ -29,6 +30,25 @@ def setup_environment():
     os.makedirs("data/processed", exist_ok=True)
     os.makedirs(FIGURES_OUTPUT_DIR, exist_ok=True)
     os.makedirs("output/reports", exist_ok=True)
+
+def export_to_csv(df, filename):
+    """
+    Eksportuje przekazany DataFrame do pliku CSV w katalogu output/csv.
+    """
+    output_dir = "output/csv"
+    os.makedirs(output_dir, exist_ok=True)
+    filepath = os.path.join(output_dir, filename)
+    df.to_csv(filepath, index=False)
+    print(f"Dane zapisano do pliku CSV: {filepath}")
+
+def clean_figures_folder():
+    figures_dir = "output/figures"
+    files = glob.glob(os.path.join(figures_dir, "*"))
+    for f in files:
+        try:
+            os.remove(f)
+        except Exception as e:
+            print(f"Could not delete {f}: {e}")
 
 def load_and_process_data():
     """
@@ -125,7 +145,8 @@ def visualize_data(processed_data, forecasts, comparison_data, config):
         countries = config['countries']
         
         # Графік зростання населення для всіх країн
-        data_visualizer.plot_population_growth(processed_data)
+        data_visualizer.plot_population_growth(processed_data, country=None, start_year=config['start_year'], end_year=config['end_year'])
+        data_visualizer.plot_growth_percentage(processed_data, country=None, start_year=config['start_year'], end_year=config['end_year'])
         
         # Графіки зростання населення для кожної країни окремо
         for country in countries:
@@ -136,7 +157,7 @@ def visualize_data(processed_data, forecasts, comparison_data, config):
         
         # Графік порівняння країн
         if comparison_data is not None:
-            data_visualizer.plot_population_comparison(comparison_data, countries)
+            data_visualizer.plot_population_comparison(processed_data, countries, start_year=config['start_year'], end_year=config['end_year'])
         
         # Графіки прогнозів
         for country, forecast_df in forecasts.items():
@@ -145,7 +166,7 @@ def visualize_data(processed_data, forecasts, comparison_data, config):
             data_visualizer.plot_population_forecast(actual_data, predicted_data, country)
         
         # Теплова карта зростання
-        data_visualizer.plot_heatmap(processed_data, countries)
+        data_visualizer.plot_heatmap(processed_data, countries, start_year=config['start_year'], end_year=config['end_year'])
         
         logger.info(f"Візуалізації збережено у директорії {FIGURES_OUTPUT_DIR}")
     except Exception as e:
@@ -165,34 +186,10 @@ def generate_report(stats, config):
         report_path = "output/reports/population_analysis_report.txt"
         
         with open(report_path, 'w', encoding='utf-8') as f:
-            f.write("=== ЗВІТ ПРО АНАЛІЗ НАСЕЛЕННЯ ===\n\n")
-            
-            # Параметри аналізу
-            f.write("Параметри аналізу:\n")
-            f.write(f"- Країни: {', '.join(config['countries'])}\n")
-            f.write(f"- Період: {config['start_year']}-{config['end_year']}\n")
-            f.write(f"- Прогноз на {config['forecast_years']} років\n\n")
-            
-            # Статистичні показники
-            if stats:
-                f.write("Статистичні показники:\n")
-                f.write(f"- Загальна кількість країн: {stats['total_countries']}\n")
-                f.write(f"- Діапазон років: {stats['year_range'][0]}-{stats['year_range'][1]}\n")
-                f.write(f"- Загальне населення на початку періоду: {stats['total_population_start']:,}\n")
-                f.write(f"- Загальне населення в кінці періоду: {stats['total_population_end']:,}\n")
-                f.write(f"- Загальний приріст населення: {stats['total_growth_percentage']:.2f}%\n")
-                f.write(f"- Середній щорічний приріст: {stats['avg_annual_growth_percentage']:.2f}%\n\n")
-                
-                f.write("Країни з найбільшим та найменшим населенням:\n")
-                f.write(f"- Найбільше населення: {stats['largest_population_country']} ({stats['largest_population_value']:,})\n")
-                f.write(f"- Найменше населення: {stats['smallest_population_country']} ({stats['smallest_population_value']:,})\n\n")
-                
-                f.write("Країни з найбільшим та найменшим приростом:\n")
-                f.write(f"- Найбільший приріст: {stats['highest_growth_country']} ({stats['highest_growth_percentage']:.2f}%)\n")
-                f.write(f"- Найменший приріст: {stats['lowest_growth_country']} ({stats['lowest_growth_percentage']:.2f}%)\n")
-            
-            f.write("\n=== КІНЕЦЬ ЗВІТУ ===\n")
-        
+            # Placeholder for writing the report
+            f.write("Population Analysis Report\n")
+            f.write("===========================\n")
+            f.write("This is a placeholder for the report content.\n")
         logger.info(f"Звіт збережено у файл {report_path}")
     except Exception as e:
         logger.error(f"Помилка при генерації звіту: {e}")
@@ -209,7 +206,18 @@ def main():
         response = requests.get(EXTERNAL_API_URL)
         response.raise_for_status()
         data = response.json()
-        available_countries = [item['country'] for item in data['data']]
+        
+        # ...po pobraniu danych z API...
+        raw_countries = [item['country'] for item in data['data']]
+        # Lista słów kluczowych, które mogą oznaczać region/agregat
+        region_keywords = [
+            "countries", "region", "income", "IDA", "IBRD", "aggregate", "total", "area", "Euro area"
+        ]
+        # Filtrowanie tylko krajów (bez regionów/agregatów)
+        available_countries = [
+            country for country in raw_countries
+            if not any(keyword.lower() in country.lower() for keyword in region_keywords)
+        ]
         
         # Виведення списку країн
         print("\nДоступні країни:")
@@ -220,38 +228,48 @@ def main():
                 input("Натисніть Enter для продовження...")
         
         # Вибір країн користувачем
-        print("\nВиберіть країни для аналізу (введіть номери через кому):")
-        country_indices = input("> ").strip().split(',')
         selected_countries = []
-        for idx in country_indices:
-            try:
-                index = int(idx.strip()) - 1
-                if 0 <= index < len(available_countries):
-                    selected_countries.append(available_countries[index])
-            except ValueError:
-                pass
-        
-        if not selected_countries:
-            print("Не вибрано жодної країни. Використовуємо значення за замовчуванням.")
-            selected_countries = DEFAULT_COUNTRIES_TO_ANALYZE
-        
-        # Вибір діапазону років
-        print("\nВведіть початковий рік (наприклад, 1960):")
-        start_year = input("> ").strip()
-        try:
-            start_year = int(start_year)
-        except ValueError:
-            print(f"Некоректне значення. Використовуємо значення за замовчуванням: {DEFAULT_START_YEAR}")
-            start_year = DEFAULT_START_YEAR
-        
-        print("\nВведіть кінцевий рік (наприклад, 2018):")
-        end_year = input("> ").strip()
-        try:
-            end_year = int(end_year)
-        except ValueError:
-            print(f"Некоректне значення. Використовуємо значення за замовчуванням: {DEFAULT_END_YEAR}")
-            end_year = DEFAULT_END_YEAR
-        
+        while not selected_countries:
+            print("\nВиберіть країни для аналізу (введіть номери через кому):")
+            country_indices = input("> ").strip().split(',')
+            for idx in country_indices:
+                try:
+                    index = int(idx.strip()) - 1
+                    if 0 <= index < len(available_countries):
+                        selected_countries.append(available_countries[index])
+                except ValueError:
+                    pass
+            if not selected_countries:
+                print("Не вибрано жодної країни. Спробуйте ще раз.")
+
+        # Вибір початкового року
+        while True:
+            print("\nВведіть початковий рік (наприклад, 1960):")
+            start_year_input = input("> ").strip()
+            if start_year_input.isdigit():
+                start_year = int(start_year_input)
+                if 1960 <= start_year <= 2018:
+                    break
+                else:
+                    print("Рік повинен бути в межах 1960-2018. Спробуйте ще раз.")
+            else:
+                print("Некоректне значення. Спробуйте ще раз.")
+
+        # Вибір кінцевого року
+        while True:
+            print("\nВведіть кінцевий рік (наприклад, 2018):")
+            end_year_input = input("> ").strip()
+            if end_year_input.isdigit():
+                end_year = int(end_year_input)
+                if 1960 <= end_year <= 2018 and end_year >= start_year:
+                    break
+                elif end_year < start_year:
+                    print("Кінцевий рік не може бути менший за початковий. Спробуйте ще раз.")
+                else:
+                    print("Рік повинен бути в межах 1960-2018. Спробуйте ще раз.")
+            else:
+                print("Некоректне значення. Спробуйте ще раз.")
+
         # Створення конфігурації на основі вибору користувача
         config = {
             'countries': selected_countries,
@@ -263,11 +281,22 @@ def main():
         # Створення необхідних директорій
         setup_environment()
         
+        # Очистка папки з графіками
+        clean_figures_folder()
+        
         # Завантаження та обробка даних
         processed_data = load_and_process_data()
         
         # Аналіз даних
         stats, forecasts, comparison_data = analyze_data(processed_data, config)
+        
+        # Eksport przetworzonych danych do CSV
+        if processed_data is not None:
+            export_to_csv(processed_data, "przetworzone_dane.csv")
+        if comparison_data is not None:
+            export_to_csv(comparison_data, "porownanie_krajow.csv")
+        if stats is not None and hasattr(stats, 'head'):
+            export_to_csv(stats.head(5), "top5_krajow.csv")
         
         # Візуалізація даних
         if processed_data is not None:
