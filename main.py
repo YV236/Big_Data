@@ -31,16 +31,6 @@ def setup_environment():
     os.makedirs(FIGURES_OUTPUT_DIR, exist_ok=True)
     os.makedirs("output/reports", exist_ok=True)
 
-def export_to_csv(df, filename):
-    """
-    Eksportuje przekazany DataFrame do pliku CSV w katalogu output/csv.
-    """
-    output_dir = "output/csv"
-    os.makedirs(output_dir, exist_ok=True)
-    filepath = os.path.join(output_dir, filename)
-    df.to_csv(filepath, index=False)
-    print(f"Dane zapisano do pliku CSV: {filepath}")
-
 def clean_figures_folder():
     figures_dir = "output/figures"
     files = glob.glob(os.path.join(figures_dir, "*"))
@@ -194,6 +184,43 @@ def generate_report(stats, config):
     except Exception as e:
         logger.error(f"Помилка при генерації звіту: {e}")
 
+def export_data_for_bi(processed_data, comparison_data, stats):
+    """
+    Експортує дані у різні формати для інтеграції з BI-інструментами.
+    
+    Args:
+        processed_data: DataFrame з обробленими даними
+        comparison_data: DataFrame з даними для порівняння
+        stats: DataFrame зі статистикою
+    """
+    # Експорт у CSV
+    if processed_data is not None:
+        DataProcessor.export_to_csv(processed_data, "przetworzone_dane.csv")
+    if comparison_data is not None:
+        DataProcessor.export_to_csv(comparison_data, "porownanie_krajow.csv")
+    if stats is not None and hasattr(stats, 'head'):
+        DataProcessor.export_to_csv(stats.head(5), "top5_krajow.csv")
+
+    # Експорт в Excel (з правильним розширенням!)
+    if processed_data is not None:
+        DataProcessor.export_to_excel(processed_data, "przetworzone_dane.xlsx")
+    if comparison_data is not None:
+        DataProcessor.export_to_excel(comparison_data, "porownanie_krajow.xlsx")
+    if stats is not None and hasattr(stats, 'head'):
+        DataProcessor.export_to_excel(stats.head(5), "top5_krajow.xlsx")
+        
+    # Експорт в JSON
+    if processed_data is not None:
+        DataProcessor.export_to_json(processed_data, "przetworzone_dane.json")
+    if comparison_data is not None:
+        DataProcessor.export_to_json(comparison_data, "porownanie_krajow.json")
+    if stats is not None and hasattr(stats, 'head'):
+        DataProcessor.export_to_json(stats.head(5), "top5_krajow.json")
+        
+    print("Дані успішно експортовано для інтеграції з BI-інструментами")
+
+
+
 def main():
     """
     Головна функція для запуску проекту Population Analysis.
@@ -289,15 +316,10 @@ def main():
         
         # Аналіз даних
         stats, forecasts, comparison_data = analyze_data(processed_data, config)
-        
-        # Eksport przetworzonych danych do CSV
+
         if processed_data is not None:
-            export_to_csv(processed_data, "przetworzone_dane.csv")
-        if comparison_data is not None:
-            export_to_csv(comparison_data, "porownanie_krajow.csv")
-        if stats is not None and hasattr(stats, 'head'):
-            export_to_csv(stats.head(5), "top5_krajow.csv")
-        
+            export_data_for_bi(processed_data, comparison_data, stats)
+
         # Візуалізація даних
         if processed_data is not None:
             visualize_data(processed_data, forecasts, comparison_data, config)

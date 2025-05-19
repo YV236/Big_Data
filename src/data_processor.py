@@ -126,26 +126,45 @@ class DataProcessor:
             self.logger.error(f"Помилка при завантаженні даних з бази даних: {e}")
             raise
     
-    def export_to_csv(self, df, output_path="data/processed/population_data.csv"):
+    def export_to_csv(df, filename="population_data.csv"):
         """
-        Експорт даних у CSV-файл.
+        Експортує DataFrame у файл CSV в каталозі output/csv.
         
         Args:
-            df (pandas.DataFrame): Дані для експорту
-            output_path (str): Шлях до вихідного файлу
+        df (pandas.DataFrame): Дані для експорту
+        filename (str): Назва файлу
         """
-        self.logger.info(f"Експорт даних у файл {output_path}")
+        output_dir = "output/csv"
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
+        df.to_csv(filepath, index=False)
+        print(f"Дані збережено у файл CSV: {filepath}")
+    
+    def export_to_excel(df, filename="population_data.xlsx"):
+        """
+        Експортує DataFrame у файл Excel в каталозі output/excel.
         
-        try:
-            # Створення директорії, якщо вона не існує
-            output_dir = os.path.dirname(output_path)
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            
-            # Збереження даних у CSV-файл
-            df.to_csv(output_path, index=False)
-            
-            self.logger.info("Дані успішно експортовані у CSV-файл")
-        except Exception as e:
-            self.logger.error(f"Помилка при експорті даних у CSV-файл: {e}")
-            raise
+        Args:
+        df (pandas.DataFrame): Дані для експорту
+        filename (str): Назва файлу
+        """
+        output_dir = "output/excel"
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
+        df.to_excel(filepath, index=False, sheet_name='Population Data')
+        print(f"Дані збережено у файл Excel: {filepath}")
+        
+    def export_to_json(df, filename="population_data.json", orient="records"):
+        """
+        Експортує DataFrame у файл JSON в каталозі output/json.
+        
+        Args:
+        df (pandas.DataFrame): Дані для експорту
+        filename (str): Назва файлу
+        orient (str): Орієнтація JSON ('records', 'split', 'index', 'columns', 'values')
+        """
+        output_dir = "output/json"
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
+        df.to_json(filepath, orient=orient)
+        print(f"Дані збережено у файл JSON: {filepath}")
