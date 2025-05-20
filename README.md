@@ -16,7 +16,8 @@ Projekt polega na stworzeniu systemu analitycznego do pobierania, przetwarzania 
 #   Instrukcja uruchomienia
 
   # 1. Zainstaluj wymagane biblioteki:
-    pip install requests pandas matplotlib seaborn scikit-learn
+    pip install requests pandas matplotlib seaborn scikit-learn reportlab fpdf2 borb openpyxl
+
 
   # 2. Uruchom projekt:
     python main.py
