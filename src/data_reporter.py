@@ -32,20 +32,20 @@ class PDFReporter:
             layout = SingleColumnLayout(page)
             
             # Заголовок
-            layout.add(Paragraph(f"Звіт про населення країн", 
+            layout.add(Paragraph(f"Country population report", 
                                 font="Helvetica-Bold", 
                                 font_size=Decimal(20)))
             
             # Інформація про період
-            layout.add(Paragraph(f"Період аналізу: {config['start_year']}-{config['end_year']}", 
+            layout.add(Paragraph(f"Analysis period: {config['start_year']}-{config['end_year']}", 
                                 font="Helvetica", 
                                 font_size=Decimal(12)))
-            layout.add(Paragraph(f"Країни: {', '.join(config['countries'])}", 
+            layout.add(Paragraph(f"Countries: {', '.join(config['countries'])}", 
                                 font="Helvetica", 
                                 font_size=Decimal(12)))
             
             # Додавання графіків
-            layout.add(Paragraph("Візуалізація даних", 
+            layout.add(Paragraph("Data visualization", 
                                 font="Helvetica-Bold", 
                                 font_size=Decimal(16)))
             
@@ -90,18 +90,18 @@ class PDFReporter:
         pdf.set_font("Arial", "B", 16)
         
         # Заголовок
-        pdf.cell(0, 10, "Звіт про населення країн", ln=True, align="C")
+        pdf.cell(0, 10, "Country population report", ln=True, align="C")
         pdf.ln(5)
         
         # Інформація про період
         pdf.set_font("Arial", "", 12)
-        pdf.cell(0, 10, f"Період аналізу: {config['start_year']}-{config['end_year']}", ln=True)
-        pdf.cell(0, 10, f"Країни: {', '.join(config['countries'])}", ln=True)
+        pdf.cell(0, 10, f"Analysis period: {config['start_year']}-{config['end_year']}", ln=True)
+        pdf.cell(0, 10, f"Countries: {', '.join(config['countries'])}", ln=True)
         pdf.ln(5)
         
         # Статистика
         pdf.set_font("Arial", "B", 14)
-        pdf.cell(0, 10, "Статистичні показники", ln=True)
+        pdf.cell(0, 10, "Static indicatiors", ln=True)
         pdf.set_font("Arial", "", 12)
         
         if isinstance(stats, dict):
@@ -113,7 +113,7 @@ class PDFReporter:
         # Додавання графіків
         pdf.add_page()
         pdf.set_font("Arial", "B", 14)
-        pdf.cell(0, 10, "Візуалізація даних", ln=True)
+        pdf.cell(0, 10, "Data visualization", ln=True)
         
         # Перевірка наявності графіків
         figures_dir = "output/figures"
@@ -158,19 +158,19 @@ class PDFReporter:
         normal_style = styles['Normal']
         
         # Заголовок
-        elements.append(Paragraph(f"Звіт про населення країн", title_style))
+        elements.append(Paragraph(f"Country population report", title_style))
         elements.append(Spacer(1, 0.5*cm))
         
         # Інформація про період
-        elements.append(Paragraph(f"Період аналізу: {config['start_year']}-{config['end_year']}", normal_style))
-        elements.append(Paragraph(f"Країни: {', '.join(config['countries'])}", normal_style))
+        elements.append(Paragraph(f"Ananlysis period: {config['start_year']}-{config['end_year']}", normal_style))
+        elements.append(Paragraph(f"Country: {', '.join(config['countries'])}", normal_style))
         elements.append(Spacer(1, 0.5*cm))
         
         # Додавання статистики
-        elements.append(Paragraph("Статистичні показники", heading_style))
+        elements.append(Paragraph("Static indicators", heading_style))
         
         if isinstance(stats, dict):
-            data = [["Показник", "Значення"]]
+            data = [["Indicator", "Value"]]
             for key, value in stats.items():
                 if isinstance(value, (int, float, str)) and not isinstance(value, bool):
                     formatted_key = key.replace('_', ' ').title()
@@ -189,7 +189,7 @@ class PDFReporter:
         
         # Додавання графіків
         elements.append(Spacer(1, 1*cm))
-        elements.append(Paragraph("Візуалізація даних", heading_style))
+        elements.append(Paragraph("Data visualization", heading_style))
         
         # Перевірка наявності графіків у директорії
         figures_dir = "output/figures"
