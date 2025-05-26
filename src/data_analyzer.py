@@ -7,14 +7,14 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 class DataAnalyzer:
     """
-    Клас для аналізу даних про населення.
+    Class for population data analysis.
     """
     
     def __init__(self):
         """
-        Ініціалізація аналізатора даних.
+        Initialization of the data analyzer.
         """
-        # Налаштування логування
+        # Logging setup
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -23,24 +23,24 @@ class DataAnalyzer:
     
     def calculate_statistics(self, df):
         """
-        Розрахунок статистичних показників.
+        Calculation of statistical indicators.
         
         Args:
-            df (pandas.DataFrame): Дані для аналізу
+            df (pandas.DataFrame): Data for analysis
         
         Returns:
-            dict: Статистичні показники
+            dict: Statistical indicators
         """
-        self.logger.info("Розрахунок статистичних показників")
+        self.logger.info("Calculating statistical indicators")
         
         try:
             stats = {}
             
-            # Загальна статистика
+            # General statistics
             stats['total_countries'] = df['country'].nunique()
             stats['year_range'] = (df['year'].min(), df['year'].max())
             
-            # Статистика по населенню
+            # Population statistics
             stats['total_population_start'] = df[df['year'] == df['year'].min()]['value'].sum()
             stats['total_population_end'] = df[df['year'] == df['year'].max()]['value'].sum()
             stats['total_growth_percentage'] = (
@@ -48,10 +48,10 @@ class DataAnalyzer:
                 stats['total_population_start'] * 100
             )
             
-            # Середній щорічний приріст
+            # Average annual growth
             stats['avg_annual_growth_percentage'] = df.groupby('year')['growth_percentage'].mean().mean()
             
-            # Країни з найбільшим та найменшим населенням
+            # Countries with largest and smallest population
             latest_year = df['year'].max()
             latest_data = df[df['year'] == latest_year]
             
@@ -61,7 +61,7 @@ class DataAnalyzer:
             stats['smallest_population_country'] = latest_data.loc[latest_data['value'].idxmin()]['country']
             stats['smallest_population_value'] = latest_data['value'].min()
             
-            # Країни з найбільшим та найменшим приростом
+            # Countries with highest and lowest growth
             growth_data = df.groupby('country').apply(
                 lambda x: ((x[x['year'] == x['year'].max()]['value'].values[0] - 
                            x[x['year'] == x['year'].min()]['value'].values[0]) / 
@@ -74,55 +74,55 @@ class DataAnalyzer:
             stats['lowest_growth_country'] = growth_data.loc[growth_data['total_growth_pct'].idxmin()]['country']
             stats['lowest_growth_percentage'] = growth_data['total_growth_pct'].min()
             
-            self.logger.info("Статистичні показники успішно розраховані")
+            self.logger.info("Statistical indicators successfully calculated")
             return stats
         except Exception as e:
-            self.logger.error(f"Помилка при розрахунку статистичних показників: {e}")
+            self.logger.error(f"Error calculating statistical indicators: {e}")
             raise
     
     def predict_population(self, df, country, years_to_predict=5):
         """
-        Прогнозування населення на майбутні роки.
+        Population forecasting for future years.
         
         Args:
-            df (pandas.DataFrame): Дані для аналізу
-            country (str): Назва країни
-            years_to_predict (int): Кількість років для прогнозування
+            df (pandas.DataFrame): Data for analysis
+            country (str): Country name
+            years_to_predict (int): Number of years to predict
         
         Returns:
-            pandas.DataFrame: Дані з прогнозом
+            pandas.DataFrame: Data with forecast
         """
-        self.logger.info(f"Прогнозування населення для країни {country} на {years_to_predict} років")
+        self.logger.info(f"Forecasting population for country {country} for {years_to_predict} years")
         
         try:
-            # Фільтрація даних для вказаної країни
+            # Filtering data for the specified country
             country_data = df[df['country'] == country].sort_values('year')
             
             if country_data.empty:
-                self.logger.warning(f"Немає даних для країни {country}")
+                self.logger.warning(f"No data for country {country}")
                 return None
             
-            # Підготовка даних для моделі
+            #  Preparing data for the model
             X = country_data[['year']].values
             y = country_data['value'].values
             
-            # Створення та навчання моделі
+            # Creating and training the model
             model = LinearRegression()
             model.fit(X, y)
             
-            # Оцінка якості моделі
+            #  Model evaluation
             y_pred = model.predict(X)
             mse = mean_squared_error(y, y_pred)
             r2 = r2_score(y, y_pred)
             
-            self.logger.info(f"Модель навчена: MSE = {mse}, R² = {r2}")
+            self.logger.info(f"Model trained: MSE = {mse}, R² = {r2}")
             
-            # Прогнозування на майбутні роки
+            # Forecasting for future years
             last_year = country_data['year'].max()
             future_years = np.array([[year] for year in range(last_year + 1, last_year + years_to_predict + 1)])
             future_population = model.predict(future_years)
             
-            # Створення DataFrame з прогнозом
+            # Creating DataFrame with forecast
             future_df = pd.DataFrame({
                 'country': country,
                 'year': future_years.flatten(),
@@ -130,49 +130,49 @@ class DataAnalyzer:
                 'is_predicted': True
             })
             
-            # Додавання ознаки is_predicted до оригінальних даних
+            # Adding is_predicted flag to original data
             country_data['is_predicted'] = False
             
-            # Об'єднання оригінальних даних з прогнозом
+            # Combining original data with forecast
             result_df = pd.concat([country_data, future_df], ignore_index=True)
             
-            self.logger.info("Прогноз успішно створено")
+            self.logger.info("Forecast successfully created")
             return result_df
         except Exception as e:
-            self.logger.error(f"Помилка при прогнозуванні населення: {e}")
+            self.logger.error(f"Error during population forecasting: {e}")
             raise
     
     def compare_countries(self, df, countries, start_year=None, end_year=None):
         """
-        Порівняння населення різних країн.
+        Comparison of population between different countries.
 
         Args:
-            df (pandas.DataFrame): Дані для аналізу
-            countries (list): Список країн для порівняння
-            start_year (int, optional): Початковий рік
-            end_year (int, optional): Кінцевий рік
+            df (pandas.DataFrame): Data for analysis
+            countries (list): List of countries for comparison
+            start_year (int, optional): Start year
+            end_year (int, optional): End year
 
         Returns:
-            pandas.DataFrame: Дані для порівняння
+            pandas.DataFrame: Data for comparison
         """
-        self.logger.info(f"Порівняння країн: {', '.join(countries)}")
+        self.logger.info(f"Comparing countries: {', '.join(countries)}")
 
         try:
-            # Фільтрація даних за країнами
+            # Filtering data by countries
             filtered_df = df[df['country'].isin(countries)]
 
             if filtered_df.empty:
-                self.logger.warning("Немає даних для вказаних країн")
+                self.logger.warning("No data for specified countries")
                 return None
 
-            # Фільтрація за роками, якщо вказано
+            # Filtering by years if specified
             if start_year is not None:
                 filtered_df = filtered_df[filtered_df['year'] >= start_year]
 
             if end_year is not None:
                 filtered_df = filtered_df[filtered_df['year'] <= end_year]
 
-            # Розрахунок загального приросту для країн
+            # Calculating total growth for countries
             filtered_df = filtered_df.sort_values(['country', 'year'])
             filtered_df['growth_value'] = filtered_df.groupby('country')['value'].diff()
             filtered_df['growth_percentage'] = filtered_df.groupby('country')['value'].pct_change() * 100
@@ -180,6 +180,6 @@ class DataAnalyzer:
             return filtered_df
 
         except Exception as e:
-            self.logger.error(f"Помилка при порівнянні країн: {e}")
+            self.logger.error(f"Error during country comparison: {e}")
             return None
 
