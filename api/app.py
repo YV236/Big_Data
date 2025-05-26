@@ -3,14 +3,14 @@ from api.routes import api_bp
 
 def create_app():
     """
-    Створення та налаштування Flask додатку.
+    Creating and configuring Flask application.
     
     Returns:
-        Flask: Об'єкт Flask додатку
+        Flask: Flask application object
     """
     app = Flask(__name__)
     
-    # Реєстрація Blueprint
+    # Blueprint registration
     app.register_blueprint(api_bp)
     
     return app

@@ -1,9 +1,9 @@
-# Імпорт основних компонентів для зручного доступу
+# Import main components for convenient access
 from .app import create_app
 from .routes import api_bp
 
-# Визначення версії API
+# API version definition
 __version__ = '1.0.0'
 
-# Експорт тільки певних компонентів при використанні "from api import *"
+# Export only specific components when using "from api import *"
 __all__ = ['create_app', 'api_bp']

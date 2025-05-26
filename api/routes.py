@@ -8,16 +8,16 @@ EXTERNAL_API_URL = "https://countriesnow.space/api/v0.1/countries/population"
 @api_bp.route('/population', methods=['GET'])
 def get_population():
     """
-    Проксі-ендпоінт для отримання даних про населення зі стороннього API.
-    Може приймати параметри country, start_year, end_year.
+    Proxy endpoint for getting population data from external API.
+    Can accept parameters: country, start_year, end_year.
     """
     try:
-        # Отримати всі дані зі стороннього API
+        # Get all data from external API
         response = requests.get(EXTERNAL_API_URL)
         response.raise_for_status()
         data = response.json().get('data', [])
 
-        # Фільтрація за параметрами (якщо передані)
+        # Filtering by parameters (if provided)
         country = request.args.get('country')
         start_year = request.args.get('start_year', type=int)
         end_year = request.args.get('end_year', type=int)
@@ -25,7 +25,7 @@ def get_population():
         if country:
             data = [item for item in data if item['country'].lower() == country.lower()]
 
-        # Додаткова фільтрація за роками
+        # Additional filtering by years
         if start_year or end_year:
             for item in data:
                 item['populationCounts'] = [
