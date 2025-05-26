@@ -163,28 +163,6 @@ def visualize_data(processed_data, forecasts, comparison_data, config):
     except Exception as e:
         logger.error(f"Помилка при візуалізації даних: {e}")
 
-def generate_report(stats, config):
-    """
-    Генерує текстовий звіт з результатами аналізу.
-    
-    Args:
-        stats (dict): Статистичні показники
-        config (dict): Конфігурація аналізу
-    """
-    logger.info("Генерація звіту...")
-    
-    try:
-        report_path = "output/reports/population_analysis_report.txt"
-        
-        with open(report_path, 'w', encoding='utf-8') as f:
-            # Placeholder for writing the report
-            f.write("Population Analysis Report\n")
-            f.write("===========================\n")
-            f.write("This is a placeholder for the report content.\n")
-        logger.info(f"Звіт збережено у файл {report_path}")
-    except Exception as e:
-        logger.error(f"Помилка при генерації звіту: {e}")
-
 def export_data_for_bi(processed_data, comparison_data, stats):
     """
     Експортує дані у різні формати для інтеграції з BI-інструментами.
@@ -324,17 +302,11 @@ def main():
         # Візуалізація даних
         if processed_data is not None:
             visualize_data(processed_data, forecasts, comparison_data, config)
-        
-        # Генерація звіту
-        if stats is not None:
-            generate_report(stats, config)
 
         # Після аналізу даних
         if stats is not None:
             # Генерація PDF-звітів
             PDFReporter.generate_pdf_report(processed_data, config, stats)
-            PDFReporter.generate_simple_pdf_report(processed_data, config, stats)
-            PDFReporter.generate_interactive_pdf(processed_data, config)
 
         
         logger.info("Проект успішно завершено")
