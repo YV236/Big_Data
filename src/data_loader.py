@@ -85,7 +85,7 @@ class DataLoader:
         Returns:
             dict: Data in JSON format
         """
-        self.logger.info(f"Loading data from file {file_path}}")
+        self.logger.info(f"Loading data from file {file_path}")
         
         try:
             with open(file_path, 'r', encoding='utf-8') as f:

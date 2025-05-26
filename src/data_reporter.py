@@ -16,30 +16,30 @@ class PDFReporter:
         from reportlab.lib.units import cm
         import os
         
-        # Створення директорії для звітів
+        # Creating directory for reports
         os.makedirs("output/reports", exist_ok=True)
         
-        # Створення PDF документа
+        # Creating PDF document
         doc = SimpleDocTemplate("output/reports/population_report.pdf", pagesize=A4)
         styles = getSampleStyleSheet()
         elements = []
         
-        # Додавання стилів
+        # Adding styles
         title_style = styles['Title']
         heading_style = styles['Heading1']
         normal_style = styles['Normal']
         
-        # Заголовок
+        # Title
         elements.append(Paragraph(f"Country population report", title_style))
         elements.append(Spacer(1, 0.5*cm))
         
-        # Інформація про період
-        elements.append(Paragraph(f"Ananlysis period: {config['start_year']}-{config['end_year']}", normal_style))
-        elements.append(Paragraph(f"Country: {', '.join(config['countries'])}", normal_style))
+        # Information about the period
+        elements.append(Paragraph(f"Analysis period: {config['start_year']}-{config['end_year']}", normal_style))
+        elements.append(Paragraph(f"Countries: {', '.join(config['countries'])}", normal_style))
         elements.append(Spacer(1, 0.5*cm))
         
-        # Додавання статистики
-        elements.append(Paragraph("Static indicators", heading_style))
+        # Adding statistics
+        elements.append(Paragraph("Statistical indicators", heading_style))
         
         if isinstance(stats, dict):
             data = [["Indicator", "Value"]]
@@ -59,28 +59,28 @@ class PDFReporter:
             ]))
             elements.append(table)
         
-        # Додавання графіків
+        # Adding charts
         elements.append(Spacer(1, 1*cm))
         elements.append(Paragraph("Data visualization", heading_style))
         
-        # Перевірка наявності графіків у директорії
+        # Checking for charts in the directory
         figures_dir = "output/figures"
         if os.path.exists(figures_dir):
             for filename in os.listdir(figures_dir):
                 if filename.endswith(('.png', '.jpg')):
                     img_path = os.path.join(figures_dir, filename)
                     
-                    # Форматування назви графіка
+                    # Formatting chart name
                     chart_name = filename.replace('.png', '').replace('_', ' ').title()
                     elements.append(Paragraph(f"{chart_name}", styles['Heading2']))
                     
-                    # Додавання зображення з масштабуванням
+                    # Adding image with scaling
                     img = Image(img_path)
                     img.drawHeight = 10*cm
                     img.drawWidth = 15*cm
                     elements.append(img)
                     elements.append(Spacer(1, 0.5*cm))
         
-        # Побудова документа
+        #  Building document
         doc.build(elements)
-        print(f"PDF звіт згенеровано: output/reports/population_report.pdf")
+        print(f"PDF report generated: output/reports/population_report.pdf")
