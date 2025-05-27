@@ -73,13 +73,14 @@ def load_and_process_data():
         logger.error(f"Error processing data: {e}")
         sys.exit(1)
 
-def analyze_data(processed_data, config):
+def analyze_data(processed_data, config, total_available_countries):
     """
     Analyzes population data.
     
     Args:
         processed_data (pandas.DataFrame): Processed data
         config (dict): Analysis configuration
+        total_available_countries (int): Total number of available countries
     
     Returns:
         tuple: Statistics, forecasts and comparison data
@@ -112,6 +113,8 @@ def analyze_data(processed_data, config):
             start_year=start_year, 
             end_year=end_year
         )
+        
+        stats['total_countries'] = total_available_countries
         
         return stats, forecasts, comparison_data
     except Exception as e:
@@ -225,6 +228,8 @@ def main():
             if not any(keyword.lower() in country.lower() for keyword in region_keywords)
         ]
         
+        total_available_countries = len(available_countries)
+        
         # Displaying list of countries
         print("\nAvailable countries:")
         for i, country in enumerate(available_countries, 1):
@@ -292,9 +297,9 @@ def main():
         
         # Loading and processing data
         processed_data = load_and_process_data()
-        
         # Data analysis
-        stats, forecasts, comparison_data = analyze_data(processed_data, config)
+        stats, forecasts, comparison_data = analyze_data(processed_data, config, total_available_countries)
+        # stats, forecasts, comparison_data = analyze_data(processed_data, config)
 
         if processed_data is not None:
             export_data_for_bi(processed_data, comparison_data, stats)
