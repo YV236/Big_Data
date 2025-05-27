@@ -72,6 +72,17 @@ class PDFReporter:
                     
                     # Formatting chart name
                     chart_name = filename.replace('.png', '').replace('_', ' ').title()
+
+                    # Try to find and reformat the timestamp if present
+                    import re
+                    match = re.search(r'(\d{8}) (\d{6})', chart_name)
+                    if match:
+                        date_str = match.group(1)
+                        time_str = match.group(2)
+                        formatted_date = f"{date_str[:4]}.{date_str[4:6]}.{date_str[6:]}"
+                        formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
+                        chart_name = re.sub(r'\d{8} \d{6}', f"{formatted_date} {formatted_time}", chart_name)
+
                     elements.append(Paragraph(f"{chart_name}", styles['Heading2']))
                     
                     # Adding image with scaling
