@@ -1,4 +1,5 @@
-# Alternative
+# Yurii Vinnyk - 28182
+# Andrii Tomkiv - 28262
 
 # Big Data Project – Demographic Data Analysis
 
